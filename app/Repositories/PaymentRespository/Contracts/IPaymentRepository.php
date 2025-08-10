@@ -3,7 +3,7 @@
 
     interface IPaymentRepository
     {
-        public function show();
+        public function show(string $id);
     }
 
 ?>

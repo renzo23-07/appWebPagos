@@ -13,8 +13,8 @@ class PaymentService implements IPaymentService
         $this->PaymentRepository=$PaymentRepository;
     }
 
-    public function show(){
-        $respuesta=$this->PaymentRepository->show();
+    public function show(string $id){
+        $respuesta=$this->PaymentRepository->show($id);
         return $respuesta;
     }
 }

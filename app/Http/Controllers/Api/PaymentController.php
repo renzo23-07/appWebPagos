@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\PaymentService\Contracts\IPaymentService;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class PaymentController extends Controller
 {
@@ -16,10 +17,9 @@ class PaymentController extends Controller
     }
 
 
-    public function show(){
-        $respuesta=$this->PaymentService->show();
-
-        return $respuesta;
+    public function show(string $id){
+        $respuesta=$this->PaymentService->show($id);
+        return Inertia::render('payment/Show',$respuesta);
     }
 
     public function store(){

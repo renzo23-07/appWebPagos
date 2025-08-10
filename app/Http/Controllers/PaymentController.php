@@ -6,12 +6,22 @@ use App\Models\CreditPayment;
 use App\Models\CreditSale;
 use App\Models\Customer;
 use App\Models\Transaction;
+use App\Services\PaymentService\Contracts\IPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class PaymentController extends Controller
 {
+
+    protected $PaymentService;
+
+    function __construct(IPaymentService $PaymentService)
+    {
+        $this->PaymentService=$PaymentService;
+    }
+
+
     public function index()
     {
         
@@ -26,7 +36,7 @@ class PaymentController extends Controller
 
     public function show(string $id)
     {
-        $customer=Customer::findOrFail($id);
+        /*$customer=Customer::findOrFail($id);
         $result = DB::select('CALL GetTotalCreditAmountByCustomer(?)', [$id]);
         $totalAmount = $result[0]->total_amount ?? 0;
         
@@ -37,7 +47,10 @@ class PaymentController extends Controller
            'payments'=>$Payemnts,
            'customer'=>$customer,
            'total_amount'=>$totalAmount
-        ]);
+        ]);*/
+        $data=$this->PaymentService->show($id);
+
+        return Inertia::render('payment/Show',$data);
     }
 
     public function store(Request $request)
