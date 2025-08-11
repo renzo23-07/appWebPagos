@@ -6,6 +6,7 @@ use App\Models\CreditSale;
 use App\Models\CreditSaleItem;
 use App\Models\Customer;
 use App\Models\Transaction;
+use App\Services\CreditSaleService\Contracts\ICreditSaleService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -13,20 +14,14 @@ use Inertia\Inertia;
 class CreditSaleController extends Controller
 {
 
+    protected $creditSaleService;
+    public function __construct(ICreditSaleService $creditSaleService)
+    {
+        $this->creditSaleService = $creditSaleService;
+    }
+
     public function show(string $id){
-        $customer=Customer::findOrFail($id);
-        $result = DB::select('CALL GetTotalCreditAmountByCustomer(?)', [$id]);
-        $totalAmount = $result[0]->total_amount ?? 0;
-
-        $credit_sales_id=CreditSale::where('customer_id',$id)->value('id');
-
-        $credit_sales=CreditSaleItem::where('credit_sale_id',$credit_sales_id)->get();
-
-        return Inertia::render('creditSales/Show',[
-            'customer'=>$customer,
-            'total_amount'=>$totalAmount,
-            'credit_sales'=>$credit_sales
-        ]);
+        return Inertia::render('creditSales/Show', $this->creditSaleService->show($id));
     }
 
     public function create(string $id){
@@ -48,6 +43,11 @@ class CreditSaleController extends Controller
 
         if(!empty($result)){
             $creditSale = CreditSale::find($result[0]->id);
+            if($creditSale->status=='paid'){
+                $creditSale->update([
+                    'status'=>'pending',
+                ]);
+            }
         }else{
             $creditSale = CreditSale::create([
                 'customer_id' => $request->customer_id,

@@ -3,7 +3,7 @@
 
     interface ICreditSaleRepository
     {
-        
+        public function show(string $id);
     }
 
 ?>

@@ -4,6 +4,7 @@ namespace App\Repositories\PaymentRespository;
 use App\Models\CreditPayment;
 use App\Models\CreditSale;
 use App\Models\Customer;
+use App\Models\Transaction;
 use App\Repositories\PaymentRespository\Contracts\IPaymentRepository;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +37,53 @@ class PaymentRepository implements IPaymentRepository
             ];
         }
     }
+
+    public function store($data, $creditSale)
+    {
+        try {
+            DB::beginTransaction();
+            CreditPayment::create([
+                'credit_sales_id' => $creditSale->id,
+                'amount_paid' => $data->amount_paid,
+                'notes' => $data->note,
+                'paymens_date' => now(),
+            ]);
+
+            $amountPaid = $data->amount_paid;
+
+            if($amountPaid > $creditSale->total_amount) {
+                $amountPaid = $creditSale->total_amount;
+            }
+            $creditSale->total_amount -= $amountPaid;
+            $creditSale->save();
+
+            if ($creditSale->total_amount < 0) {
+                $creditSale->total_amount = 0;
+            }
+
+            $creditSale->save();
+
+            if($creditSale->total_amount == 0) {
+                $creditSale->status = 'paid';
+                $creditSale->save();
+            }
+
+            Transaction::create([
+                'customer_id' => $data->customer_id,
+                'action' => 'Pago a cuenta ',
+                'type' => 'pago',
+                'amount' => $data->amount_paid,
+                'total_debt' => $creditSale->total_amount,
+                'date' => now(),
+            ]);
+            DB::commit();
+            return to_route('transactions.show', $data->customer_id)
+            ->with('success', 'Payment recorded successfully.');   
+        } catch (Exception $e) {
+            DB::rollBack(); 
+            return redirect()->back()->withErrors(['error' => 'An error occurred while processing the payment.']);          
+        }
+   }
 }
 
 

@@ -66,7 +66,7 @@ defineProps<{
                     </tr>
                 </thead>
                 <tbody >
-                <tr v-for="(payment,index) in payments"  class="odd:bg-white odd:dark:bg-gray-900 even:dark:bg-gray-800 ">
+                <tr v-for="(payment,index) in payments.slice().reverse()"  class="odd:bg-white odd:dark:bg-gray-900 even:dark:bg-gray-800 ">
                     <td class="px-6 py-2 font-medium text-gray-900 dark:text-white" >{{ index+1 }}</td>
                     <td class="px-6 py-2 text-gray-600 dark:text-gray-300" >{{ payment.paymens_date }}</td>
                     <td class="px-6 py-2 text-gray-600 dark:text-gray-300" >{{ payment.amount_paid}}</td>
