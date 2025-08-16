@@ -12,20 +12,32 @@ use Inertia\Inertia;
 
 class PaymentRepository implements IPaymentRepository
 {
-    public function show(string $id)
+    public function show($data)
     {
         try{
-            $customer=Customer::findOrFail($id);
-            $result = DB::select('CALL GetTotalCreditAmountByCustomer(?)', [$id]);
+            $customer=Customer::findOrFail($data->id);
+            $result = DB::select('CALL GetTotalCreditAmountByCustomer(?)', [$data->id]);
             $totalAmount = isset($result[0]->total_amount) ? (float)$result[0]->total_amount : 0;
             
-            $Payment_id=CreditSale::where('customer_id',$id)->value('id');
+            $Payment_id=CreditSale::where('customer_id',$data->id)->value('id');
             $Payemnts=CreditPayment::where('credit_sales_id',$Payment_id)->get();
 
+            //filtro
+            if($data->start_date && $data->end_date) {
+                $Payemnts = $Payemnts->whereBetween('paymens_date', [$data->start_date, $data->end_date]);
+            } elseif($data->start_date) {
+                $Payemnts = $Payemnts->where('paymens_date', '>=', $data->start_date);
+            } elseif($data->end_date) {
+                $Payemnts = $Payemnts->where('paymens_date', '<=', $data->end_date);
+
+            }
+            
             return [
-                'payments'=>$Payemnts,
+                'payments'=>$Payemnts->values()->toArray(),
                 'customer'=>$customer,
                 'total_amount'=>$totalAmount,
+                'start_date' => $data->start_date,
+                'end_date' => $data->end_date,
                 'error' => null
             ];
         }catch(Exception $e){

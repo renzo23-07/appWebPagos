@@ -4,6 +4,7 @@
     interface ICreditSaleService
     {
         public function show(string $id);
+        public function store($data);
     }
 
 ?>

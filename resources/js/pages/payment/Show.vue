@@ -2,6 +2,8 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
+import { watch } from 'vue';
+import { ref } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -10,21 +12,42 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-defineProps<{
-    customer: {
-        id: number;
-        customer_name: string;
-        cellNumber:string;
-        address_name:string
-    };
-    total_amount:number;
-    payments:{
-        paymens_date:string;
-        amount_paid:number;
-        notes:string
-    }[];
-}>();
+interface Payment {
+    paymens_date: string;
+    amount_paid: number;
+    notes: string;
+}
 
+interface Customer {
+    id: number;
+    customer_name: string;
+    cellNumber: string;
+    address_name: string;
+}
+
+interface Props {
+    customer: Customer;
+    total_amount: number;
+    payments: Payment[];
+    start_date:string |null;
+    end_date:string|null;
+}
+
+const props = defineProps<Props>();
+
+const startDate = ref(props.start_date ??'');
+const endDate = ref(props.end_date ??  '');
+
+watch([startDate, endDate], ([start, end]) => {
+    router.get(route('payment.show',props.customer.id), {
+
+        start_date: start,
+        end_date: end
+    });
+}, { 
+    preserveState: true,
+    replace:true, 
+} as any);
 
 
 </script>
@@ -43,6 +66,8 @@ defineProps<{
                 <!-- Fecha de inicio -->
                  <label for="start_date" class="text-sm text-gray-600 mb-1">Fecha de inicio</label>
                 <input
+                    id="start_date"
+                    v-model="startDate"
                     type="date"
                     class="w-full sm:w-48 h-10 px-3 py-2 border border-gray-300 rounded"
                 />
@@ -50,6 +75,8 @@ defineProps<{
                 <!-- Fecha de fin -->
                  <label for="end_date" class="text-sm text-gray-600 mb-1">Fecha de fin</label>
                 <input
+                    id="end_date"
+                    v-model="endDate"
                     type="date"
                     class="w-full sm:w-48 h-10 px-3 py-2 border border-gray-300 rounded"
                 />
@@ -79,7 +106,7 @@ defineProps<{
             </table>
             </div>
             <div class="md:hidden space-y-4 mt-4">
-                <div v-for="(payment,index) in payments.slice().reverse()" :key="index"
+                <div v-for="(payment,index) in payments" :key="index"
                      class="flex items-start gap-4 p-4 mb-4 border rounded-xl shadow-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                     
                 <div class="flex items-center justify-center w-10 h-10 rounded-full" :class=" 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300'">

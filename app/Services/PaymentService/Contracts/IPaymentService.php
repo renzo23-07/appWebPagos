@@ -3,7 +3,7 @@
 
     interface IPaymentService 
     {
-        public function show(string $id);
+        public function show($data);
         public function store($data);
     }
 ?>

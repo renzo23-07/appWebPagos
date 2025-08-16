@@ -28,9 +28,9 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function show(string $id)
+    public function show(Request $request)
     {
-        return Inertia::render('payment/Show',$this->PaymentService->show($id));
+        return Inertia::render('payment/Show',$this->PaymentService->show($request));
     }
 
     public function store(Request $request)

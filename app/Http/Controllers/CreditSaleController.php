@@ -31,56 +31,6 @@ class CreditSaleController extends Controller
     }
 
     public function store(Request $request){
-        $request->validate([
-            'product'=>'required|string',
-            'description'=>'nullable|string',
-            'unit_price'=>'required|numeric|min:0.01',
-            'quantity'=>'required|numeric|min:1'
-        ]);
-
-        $customerId = $request->customer_id;
-        $result = DB::select('CALL CheckCustomerHasPendingCreditSale(?)', [$customerId]);
-
-        if(!empty($result)){
-            $creditSale = CreditSale::find($result[0]->id);
-            if($creditSale->status=='paid'){
-                $creditSale->update([
-                    'status'=>'pending',
-                ]);
-            }
-        }else{
-            $creditSale = CreditSale::create([
-                'customer_id' => $request->customer_id,
-                'total_amount' => 0, 
-                'sales_date'=>now()
-            ]);
-        }
-
-        $subtotal=$request->unit_price * $request->quantity;
-
-        CreditSaleItem::create([
-            'credit_sale_id'=>$creditSale->id,
-            'product'=>$request->product,
-            'description'=>$request->description ?? null,
-            'quantity'=>$request->quantity,
-            'unit_price'=>$request->unit_price,
-            'subtotal'=>$subtotal,
-            'sales_date'=>now()
-        ]);
-
-        $creditSale=CreditSale::findOrFail($creditSale->id);
-        $creditSale->total_amount +=$subtotal;
-        $creditSale->save();
-
-        Transaction::create([
-            'customer_id'=>$customerId,
-            'action'=>$request->product,
-            'type'=>'credito',
-            'date'=>now(),
-            'amount'=>$subtotal,
-            'total_debt'=>$creditSale->total_amount
-        ]);
-
-        return to_route('transactions.show', $customerId)->with('success', 'Credit sale item added successfully.');
+        return $this->creditSaleService->store($request);
     }
 }

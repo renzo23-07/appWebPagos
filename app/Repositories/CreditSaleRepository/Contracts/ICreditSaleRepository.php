@@ -4,6 +4,7 @@
     interface ICreditSaleRepository
     {
         public function show(string $id);
+        public function store( $data);
     }
 
 ?>

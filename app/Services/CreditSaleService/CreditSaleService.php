@@ -16,6 +16,11 @@ class CreditSaleService implements ICreditSaleService
     {
         return $this->creditSaleRepository->show($id);
     }
+
+    public function store($data)
+    {
+        return $this->creditSaleRepository->store($data);
+    }
 }
 
 
