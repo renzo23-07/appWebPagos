@@ -106,7 +106,7 @@ watch([startDate, endDate], ([start, end]) => {
             </table>
             </div>
             <div class="md:hidden space-y-4 mt-4">
-                <div v-for="(payment,index) in payments" :key="index"
+                <div v-for="(payment,index) in payments.slice().reverse()" :key="index"
                      class="flex items-start gap-4 p-4 mb-4 border rounded-xl shadow-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                     
                 <div class="flex items-center justify-center w-10 h-10 rounded-full" :class=" 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300'">

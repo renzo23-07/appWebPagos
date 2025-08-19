@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Phone,MapPin } from 'lucide-vue-next';
+import { ref, watch } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -11,16 +12,31 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-defineProps<{
-    customers: {
-        id: number;
-        customer_name: string;
-        cellNumber:string;
-        address_name:string
-    }[];
-}>();
+interface Customer {
+    id: number;
+    customer_name: string;
+    cellNumber: string;
+    address_name: string;
+}
 
+interface Props {
+    customers: Customer[];
+    search:string | null;
+}
 
+const props =defineProps<Props>();
+
+const search=ref(props.search ?? '');
+
+watch(search, (value) => {
+    router.get(route('customers.index'), {
+        search: value,
+    });
+}, { 
+    preserveState: true,
+    replace:true,
+    only: ['customers']
+} as any);
 
 function deleteCustomer(id: number) {
     if(confirm('¿Está seguro de que desea inhabilitar este cliente?')) {
@@ -45,6 +61,7 @@ function deleteCustomer(id: number) {
             <div>
                 <input
                 type="text"
+                v-model="search"
                 placeholder="Buscar por nombre"
                 class="mb-4 w-70 h-8 mt-6 px-4 py-2 border border-gray-300 rounded "
             />

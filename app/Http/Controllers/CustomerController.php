@@ -11,12 +11,19 @@ use Inertia\Inertia;
 class CustomerController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        $customers=DB::select('CALL GetActiveCustomersWithAddress()');
+        $search = $request->input('search');
+
+        if($request->has('search') && !empty($search)) {
+            $customers = DB::select('CALL GetActiveCustomersWithAddressByName(?)', [$search]);
+        }else {
+            $customers=DB::select('CALL GetActiveCustomersWithAddress()');
+        }
 
         return Inertia::render('customers/Index',[
-            'customers' => $customers
+            'customers' => $customers,
+            'search' => $request->input('search', ''),
         ]);
     }
 
